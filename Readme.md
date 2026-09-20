@@ -1,1 +1,0 @@
-Información de placa base
