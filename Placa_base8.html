@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Master Interactivo: Placa Base ASUS TUF GAMING</title>
+    <style>
+        /* Estilos generales y reseteo moderno */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1e293b;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #334155;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: #38bdf8;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* Barra de pestañas de modo de aprendizaje */
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            background: #1e293b;
+            padding: 0.75rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .mode-btn {
+            background: #334155;
+            border: none;
+            color: #f8fafc;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .mode-btn.active, .mode-btn:hover {
+            background: #0ea5e9;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Contenedor principal adaptable */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 2rem;
+        }
+
+        @media (min-width: 900px) {
+            main {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+
+        /* Contenedor de la imagen y visor */
+        .viewer-container {
+            position: relative;
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 550px;
+            height: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #334155;
+            flex-shrink: 0;
+        }
+
+        .board-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-origin: center center;
+            transition: transform 0.2s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .board-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Botones de control flotantes (Zoom) */
+        .zoom-controls {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 20;
+        }
+
+        .zoom-btn {
+            background: #334155;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover {
+            background: #0ea5e9;
+        }
+
+        /* Puntos interactivos sobre la fotografía real (ahora con un diseño más discreto) */
+        .hotspot {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background-color: rgba(56, 189, 248, 0.85);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .hotspot:hover, .hotspot.active {
+            background-color: #f43f5e;
+            transform: translate(-50%, -50%) scale(1.4);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.9);
+        }
+
+        /* Panel de Información / Retos */
+        .info-panel {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-panel h2 {
+            color: #38bdf8;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 0.5rem;
+        }
+
+        .info-section {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border-left: 3px solid #38bdf8;
+        }
+
+        .info-section h4 {
+            color: #38bdf8;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-section p {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .info-section.failure {
+            border-left-color: #f43f5e;
+            background: rgba(244, 63, 94, 0.1);
+        }
+        .info-section.failure h4 {
+            color: #fca5a5;
+        }
+
+        .info-section.trivia {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .info-section.trivia h4 {
+            color: #6ee7b7;
+        }
+
+        /* Contenedores para alternar modos */
+        .challenge-container {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .challenge-container.active {
+            display: flex;
+        }
+
+        .standard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .standard-container.hidden {
+            display: none;
+        }
+
+        .challenge-box {
+            background: #0f172a;
+            border: 2px dashed #38bdf8;
+            padding: 1.2rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .challenge-box h3 {
+            color: #38bdf8;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 0.75rem;
+            transition: background 0.2s;
+        }
+
+        .challenge-btn:hover {
+            background: #059669;
+        }
+
+        /* Barra de navegación rápida inferior */
+        .quick-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+
+        .quick-chip {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 0.35rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-chip:hover, .quick-chip.active {
+            background: #0ea5e9;
+            border-color: #38bdf8;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #1e293b;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Laboratorio Master Interactivo: ASUS TUF GAMING</h1>
+        <p>Aprende arquitectura de hardware mediante exploración libre o pon a prueba tus conocimientos con el modo examen.</p>
+    </header>
+
+    <!-- Pestañas de selección de modo -->
+    <nav class="mode-selector" aria-label="Selección de modo de aprendizaje">
+        <button class="mode-btn active" id="btnExploreMode">Exploración Libre</button>
+        <button class="mode-btn" id="btnChallengeMode">Modo Examen (Reto)</button>
+    </nav>
+
+    <main>
+        <!-- Visor fotográfico con zoom -->
+        <section class="viewer-container" aria-label="Visor de Placa Base Real">
+            <div class="board-wrapper" id="boardWrapper">
+                <!-- Imagen real integrada -->
+                <img src="s-l1200 (1).webp" alt="Placa base ASUS TUF GAMING" class="board-img" id="boardImg">
+                
+                <!-- Puntos interactivos limpios (sin números para evitar pistas visuales en el reto) -->
+                <button class="hotspot" style="top: 31%; left: 59%;" data-id="cpu" aria-label="Zócalo CPU"></button>
+                <button class="hotspot" style="top: 15%; left: 78%;" data-id="ram" aria-label="Ranuras RAM"></button>
+                <button class="hotspot" style="top: 63%; left: 42%;" data-id="pcie" aria-label="Ranura PCIe"></button>
+                <button class="hotspot" style="top: 70%; left: 78%;" data-id="chipset" aria-label="Chipset"></button>
+                <button class="hotspot" style="top: 27%; left: 42%;" data-id="vrm" aria-label="VRM y Alimentación"></button>
+                <button class="hotspot" style="top: 86%; left: 75%;" data-id="sata" aria-label="Puertos SATA"></button>
+                <button class="hotspot" style="top: 30%; left: 17%;" data-id="io" aria-label="Panel I/O"></button>
+                <button class="hotspot" style="top: 73%; left: 52%;" data-id="m2" aria-label="Ranura M.2"></button>
+                <button class="hotspot" style="top: 84%; left: 23%;" data-id="audio" aria-label="Controlador de Audio"></button>
+                <button class="hotspot" style="top: 78%; left: 63%;" data-id="bios" aria-label="BIOS y Pila CMOS"></button>
+            </div>
+
+            <!-- Controles de Zoom Flotantes -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomIn" aria-label="Acercar">+</button>
+                <button class="zoom-btn" id="zoomOut" aria-label="Alejar">-</button>
+                <button class="zoom-btn" id="zoomReset" aria-label="Restablecer" style="font-size: 0.9rem;">↺</button>
+            </div>
+        </section>
+
+        <!-- Panel Informativo Intercambiable -->
+        <section class="info-panel" id="infoPanel" aria-live="polite">
+            
+            <!-- Contenedor Modo Exploración -->
+            <div class="standard-container" id="standardContainer">
+                <h2 id="componentTitle">Selecciona un componente</h2>
+                <div class="info-section">
+                    <h4>Qué es</h4>
+                    <p id="infoWhat">Haz clic sobre cualquier punto de la placa o en el menú inferior para descubrir la descripción técnica completa.</p>
+                </div>
+                <div class="info-section">
+                    <h4>Para qué sirve</h4>
+                    <p id="infoPurpose">Función principal dentro del ecosistema del ordenador.</p>
+                </div>
+                <div class="info-section">
+                    <h4>Especificaciones y estándares</h4>
+                    <p id="infoSpecs">Tecnologías, buses y compatibilidades asociadas.</p>
+                </div>
+                <div class="info-section">
+                    <h4>Consejo de montaje e instalación</h4>
+                    <p id="infoTip">Buenas prácticas para evitar daños durante el ensamblaje.</p>
+                </div>
+                <div class="info-section failure">
+                    <h4>Diagnóstico y posible fallo</h4>
+                    <p id="infoFailure">Síntomas habituales y resolución de problemas.</p>
+                </div>
+                <div class="info-section trivia">
+                    <h4>¿Sabías qué?</h4>
+                    <p id="infoTrivia">Dato curioso o avanzado sobre este componente.</p>
+                </div>
+            </div>
+
+            <!-- Contenedor Modo Reto / Examen -->
+            <div class="challenge-container" id="challengeContainer">
+                <h2>Modo Examen de Hardware</h2>
+                <div class="challenge-box">
+                    <h3>Reto de Identificación</h3>
+                    <p id="challengePrompt">Pulsa el botón para comenzar el examen y localizar componentes por su nombre técnico.</p>
+                    <p id="challengeFeedback" style="margin-top: 0.75rem; font-weight: bold; color: #38bdf8;"></p>
+                    <button class="challenge-btn" id="startChallengeBtn">Iniciar Examen</button>
+                </div>
+                <div class="info-section">
+                    <h4>Puntuación</h4>
+                    <p id="scoreText">Aciertos: 0 | Intentos: 0</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Barra de navegación rápida inferior -->
+        <nav class="quick-nav" aria-label="Navegación rápida de componentes" id="quickNav">
+            <button class="quick-chip" data-id="cpu">Zócalo CPU</button>
+            <button class="quick-chip" data-id="ram">Memoria RAM</button>
+            <button class="quick-chip" data-id="pcie">Ranuras PCIe</button>
+            <button class="quick-chip" data-id="chipset">Chipset</button>
+            <button class="quick-chip" data-id="vrm">VRM / Energía</button>
+            <button class="quick-chip" data-id="sata">Puertos SATA</button>
+            <button class="quick-chip" data-id="io">Panel I/O</button>
+            <button class="quick-chip" data-id="m2">Ranura M.2</button>
+            <button class="quick-chip" data-id="audio">Audio</button>
+            <button class="quick-chip" data-id="bios">BIOS / CMOS</button>
+        </nav>
+    </main>
+
+    <footer>
+        <p>Laboratorio Educativo Interactivo - Arquitectura de Computadores</p>
+    </footer>
+
+    <script>
+        // Base de datos completa estructurada
+        const componentsData = {
+            cpu: { title: "Zócalo del Procesador (CPU Socket)", what: "Es el conector físico de alta densidad situado en el centro de la placa base.", purpose: "Permite la interconexión eléctrica entre el microprocesador y el sistema.", specs: "Compatible con zócalo AMD AM5 (LGA 1718), PCIe 5.0/4.0.", tip: "Nunca toques los pines dorados y alinea el triángulo de orientación.", failure: "Pines doblados o pantallas negras por mala presión del disipador.", trivia: "El zócalo AM5 cambió a pines en la placa y no en el procesador." },
+            ram: { title: "Bancos de Memoria RAM (DIMM Slots)", what: "Ranuras longitudinales reforzadas para insertar módulos de memoria.", purpose: "Almacenan temporalmente los datos en ejecución.", specs: "Soporta DDR5 en doble canal con perfiles EXPO/XMP.", tip: "Inserta hasta escuchar un clic firme en ambos extremos.", failure: "Pantallazos azules (BSOD) o pitidos de error de placa.", trivia: "La memoria DDR5 integra el chip de gestión de energía (PMIC) en el módulo." },
+            pcie: { title: "Ranuras de Expansión PCI Express (PCIe)", what: "Slots apantallados para tarjetas gráficas y de expansión.", purpose: "Conexión directa al bus de alta velocidad de la CPU.", specs: "Ranura SafeSlot PCIe 4.0/5.0 x16.", tip: "Pulsa siempre la pestaña de seguridad antes de extraer una gráfica.", failure: "Ausencia de señal de vídeo o tarjeta no detectada.", trivia: "El refuerzo metálico evita que el peso de las GPUs modernas rompa el slot." },
+            chipset: { title: "Chipset (Controlador de Flujo)", what: "Circuito auxiliar protegido bajo un disipador pasivo TUF.", purpose: "Coordina el tráfico secundario entre CPU y periféricos (USB, almacenamiento).", specs: "Chipset AMD optimizado para conectividad fiable.", tip: "No retires su disipador pasivo para asegurar una correcta refrigeración.", failure: "Puertos USB que fallan o desconexiones aleatorias de discos.", trivia: "La gestión de memoria principal actual reside en la CPU, aliviando al chipset." },
+            vrm: { title: "Módulos Reguladores de Voltaje (VRM)", what: "Componentes electrónicos avanzados ocultos bajo el disipador izquierdo.", purpose: "Transforman los 12V de la fuente en energía limpia y baja para la CPU.", specs: "Fases de alimentación múltiples de grado militar.", tip: "Mantén una buena ventilación en el chasis para evitar acumulación de calor.", failure: "Apagones repentinos bajo tareas de gran carga de trabajo.", trivia: "Unos buenos VRM evitan el Thermal Throttling de energía en procesadores exigentes." },
+            sata: { title: "Puertos SATA", what: "Conectores horizontales para cables de datos de almacenamiento.", purpose: "Enlazan discos duros mecánicos (HDD) y SSDs de 2.5 pulgadas.", specs: "Estándar SATA III de 6 Gbps.", tip: "Usa cables con pestillos de seguridad metálicos.", failure: "Unidades no reconocidas por cables defectuosos.", trivia: "Permiten almacenamiento masivo económico frente a los costosos M.2." },
+            io: { title: "Panel de Puertos Traseros (I/O Panel)", what: "Bloque metálico de conectores externos en la parte posterior.", purpose: "Centraliza la conexión de pantallas, USBs, red y audio.", specs: "USB avanzados, HDMI/DisplayPort, Ethernet y Wi-Fi.", tip: "Comprueba el ajuste correcto de la chapa trasera al montar el equipo.", failure: "Puertos USB inhabilitados por descargas de electricidad estática.", trivia: "Muchas placas de gama media incluyen esta protección pre-montada." },
+            m2: { title: "Ranuras M.2 NVMe", what: "Zócalos horizontales de perfil bajo para discos tipo tarjeta.", purpose: "Almacenamiento ultrarrápido conectado a carriles PCIe.", specs: "Soporte NVMe PCIe 4.0/5.0 en formato 2280.", tip: "Retira el film de la almohadilla térmica antes de fijar la unidad.", failure: "Thermal throttling por temperatura o disco no detectado.", trivia: "Superan los 7,000 MB/s de velocidad de lectura." },
+            audio: { title: "Controlador de Audio Integrado", what: "Sección de audio aislada físicamente de interferencias.", purpose: "Procesa y convierte sonido digital en analógico de alta fidelidad.", specs: "Condensadores japoneses premium y aislamiento por capas.", tip: "Conecta los auriculares principales en el jack verde trasero.", failure: "Zumbidos eléctricos de fondo o ausencia de sonido.", trivia: "El aislamiento físico evita que el ruido eléctrico de la GPU contamine el sonido." },
+            bios: { title: "Memoria BIOS/UEFI y Pila CMOS", what: "Chip de firmware flash y pila redonda de botón de litio CR2032.", purpose: "Inicializa el hardware y mantiene la hora y parámetros al apagar.", specs: "Flash SPI UEFI con función BIOS FlashBack.", tip: "Retira la pila 3 minutos para resetear valores si hay fallos graves.", failure: "Pérdida constante de la hora al apagar el equipo.", trivia: "Las interfaces UEFI modernas permiten el uso completo del ratón." }
+        };
+
+        // Elementos DOM
+        const boardWrapper = document.getElementById('boardWrapper');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+        const hotspots = document.querySelectorAll('.hotspot');
+        const quickChips = document.querySelectorAll('.quick-chip');
+        
+        // Pestañas y contenedores
+        const btnExploreMode = document.getElementById('btnExploreMode');
+        const btnChallengeMode = document.getElementById('btnChallengeMode');
+        const standardContainer = document.getElementById('standardContainer');
+        const challengeContainer = document.getElementById('challengeContainer');
+        const quickNav = document.getElementById('quickNav');
+
+        // Campos de información
+        const componentTitle = document.getElementById('componentTitle');
+        const infoWhat = document.getElementById('infoWhat');
+        const infoPurpose = document.getElementById('infoPurpose');
+        const infoSpecs = document.getElementById('infoSpecs');
+        const infoTip = document.getElementById('infoTip');
+        const infoFailure = document.getElementById('infoFailure');
+        const infoTrivia = document.getElementById('infoTrivia');
+
+        // Modo Reto elementos
+        const startChallengeBtn = document.getElementById('startChallengeBtn');
+        const challengePrompt = document.getElementById('challengePrompt');
+        const challengeFeedback = document.getElementById('challengeFeedback');
+        const scoreText = document.getElementById('scoreText');
+
+        let scale = 1;
+        let challengeActive = false;
+        let targetComponentKey = null;
+        let score = 0;
+        let attempts = 0;
+
+        // Controles de Zoom
+        zoomInBtn.addEventListener('click', () => { if (scale < 2.5) { scale += 0.5; boardWrapper.style.transform = `scale(${scale})`; } });
+        zoomOutBtn.addEventListener('click', () => { if (scale > 1) { scale -= 0.5; boardWrapper.style.transform = `scale(${scale})`; } });
+        zoomResetBtn.addEventListener('click', () => { scale = 1; boardWrapper.style.transform = 'scale(1)'; });
+
+        // Cambio de Modos de Aprendizaje
+        btnExploreMode.addEventListener('click', () => {
+            btnExploreMode.classList.add('active');
+            btnChallengeMode.classList.remove('active');
+            standardContainer.classList.remove('hidden');
+            challengeContainer.classList.remove('active');
+            quickNav.style.display = 'flex';
+            challengeActive = false;
+        });
+
+        btnChallengeMode.addEventListener('click', () => {
+            btnChallengeMode.classList.add('active');
+            btnExploreMode.classList.remove('active');
+            standardContainer.classList.add('hidden');
+            challengeContainer.classList.add('active');
+            quickNav.style.display = 'none';
+            challengeActive = false;
+            challengePrompt.textContent = "Pulsa el botón para comenzar el examen y localizar componentes por su nombre técnico.";
+            challengeFeedback.textContent = "";
+        });
+
+        // Lógica de Exploración Libre
+        function showComponentDetails(id) {
+            if (challengeActive) return;
+
+            const data = componentsData[id];
+            if (data) {
+                componentTitle.textContent = data.title;
+                infoWhat.textContent = data.what;
+                infoPurpose.textContent = data.purpose;
+                infoSpecs.textContent = data.specs;
+                infoTip.textContent = data.tip;
+                infoFailure.textContent = data.failure;
+                infoTrivia.textContent = data.trivia;
+
+                hotspots.forEach(h => {
+                    if (h.getAttribute('data-id') === id) h.classList.add('active');
+                    else h.classList.remove('active');
+                });
+
+                quickChips.forEach(chip => {
+                    if (chip.getAttribute('data-id') === id) chip.classList.add('active');
+                    else chip.classList.remove('active');
+                });
+            }
+        }
+
+        // Lógica del Modo Examen (Reto basado únicamente en el nombre)
+        startChallengeBtn.addEventListener('click', () => {
+            const keys = Object.keys(componentsData);
+            targetComponentKey = keys[Math.floor(Math.random() * keys.length)];
+            const targetName = componentsData[targetComponentKey].title;
+            challengePrompt.innerHTML = `Localiza en la fotografía el siguiente componente:<br><strong style="color: #38bdf8; font-size: 1.1rem;">${targetName}</strong>`;
+            challengeFeedback.textContent = "";
+            challengeActive = true;
+            startChallengeBtn.textContent = "Siguiente Pregunta";
+        });
+
+        hotspots.forEach(hotspot => {
+            hotspot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const clickedId = hotspot.getAttribute('data-id');
+
+                if (challengeActive) {
+                    attempts++;
+                    if (clickedId === targetComponentKey) {
+                        score++;
+                        challengeFeedback.style.color = "#10b981";
+                        challengeFeedback.textContent = "¡Respuesta correcta! Has identificado bien el componente.";
+                        challengeActive = false;
+                    } else {
+                        challengeFeedback.style.color = "#f43f5e";
+                        challengeFeedback.textContent = "Incorrecto. Inténtalo de nuevo haciendo clic en otro punto.";
+                    }
+                    scoreText.textContent = `Aciertos: ${score} | Intentos: ${attempts}`;
+                } else {
+                    showComponentDetails(clickedId);
+                }
+            });
+        });
+
+        quickChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                showComponentDetails(chip.getAttribute('data-id'));
+            });
+        });
+    </script>
+</body>
+</html>
